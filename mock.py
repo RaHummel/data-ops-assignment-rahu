@@ -27,6 +27,8 @@ def mock_aws():
 
     response = s3.list_objects_v2(Bucket=bucketname)
     print([object["Key"] for object in response["Contents"]])
+    
+    files = [s3.get_object(Bucket=bucketname, Key=object["Key"])["Body"] for object in response["Contents"]]
 
     # DynamoDB
     # Create mock client
@@ -49,39 +51,17 @@ def mock_aws():
             'AttributeType': 'N'
         }])
 
+    dynamodb_res = boto3.resource('dynamodb', region_name='us-east-1')
+    table_res = dynamodb_res.Table(table)
+
     # Insert DynamoDB records
     with open('data/user/users.json') as json_file:
         data = json.load(json_file)
         for user in data:
-            dynamodb.put_item(
-                Item={
-                    'id': {
-                        'N': str(user['id']),
-                    },
-                    'first_name': {
-                        'S': str(user['first_name']),
-                    },
-                    'email': {
-                        'S': str(user['email']),
-                    },
-                    'city': {
-                        'S': str(user['city']),
-                    },
-                    'age': {
-                        'S': str(user['age']),
-                    },
-                    'gender': {
-                        'S': str(user['gender']),
-                    },
-                    'part_color': {
-                        'S': str(user['part_color']),
-                    },
-                },
-                TableName=table,
+            table_res.put_item(
+                Item=user
             )
 
-    response = dynamodb.scan(TableName=table)
-    print(response)
+    response = table_res.scan()
 
-
-mock_aws()
+    return files, response['Items']

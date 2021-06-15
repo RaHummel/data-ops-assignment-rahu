@@ -4,11 +4,14 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+pandas = "1.2.4"
+xlrd = ">=1.0.0"
+openpyxl = "*"
 boto3 = "*"
 moto = "*"
+matplotlib = "*"
 
 [dev-packages]
-yapf = "*"
 
 [requires]
 python_version = "3.9"
